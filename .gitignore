@@ -1,0 +1,19 @@
+# Credentials and local environment (never commit)
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+.venv/
+__pycache__/
+.pytest_cache/
+.DS_Store
+*.pyc
+# Raw blind ratings and private keys must never be checked in
+**/*answer_key*
+outputs/*.csv
+outputs/*.json
+!outputs/synthetic_queries.csv
+!outputs/batch_log.csv
+!outputs/metrics.json
+!outputs/failure_rows.csv
+!outputs/run_manifest.json

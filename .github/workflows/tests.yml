@@ -1,0 +1,33 @@
+name: tests
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  python-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install lightweight app dependencies
+        run: pip install -r requirements.txt
+      - name: Validate Python syntax
+        run: python -m compileall -q app.py synthlab run_experiment.py run_semantic_evaluation.py tests
+      - name: Run deterministic offline tests
+        run: python -m pytest -q
+      - name: Verify actual public BANKING77 checksum and split contract
+        run: |
+          python - <<'PY'
+          from synthlab.dataset import INTENTS,load_banking77,prepare_data
+          train,test=load_banking77()
+          seeds,real_train,heldout=prepare_data(train,test,INTENTS,seed_per_intent=8)
+          assert len(train)==10003 and len(test)==3080
+          assert len(seeds)==48
+          assert not set(seeds.text)&set(real_train.text)
+          assert not set(seeds.text)&set(heldout.text)
+          print("Verified public dataset checksum, 6 labels, 48 isolated prompt seeds.")
+          PY
